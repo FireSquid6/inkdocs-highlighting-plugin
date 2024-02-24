@@ -1,0 +1,324 @@
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inkdocs</title>
+
+  <meta name="description" content="Inkdocs is a documentation generator for the web">
+  <meta name="author" content="firesquid6">
+  <meta name="keywords"
+    content="documentation, generator, inkdocs, html, css, htmx,inkdocs, ink, docs, best, documentation, generator">
+  <link rel="stylesheet" href="/styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+  <script defer src='/htmx.min.js'></script>
+  <script defer src="/client-javascript.js"></script>
+</head>
+
+<body class="flex min-h-[100vh] flex-col">
+  <header class="sticky top-0 z-50 bg-background bg-opacity-90">
+    <nav class="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
+      <div class="flex lg:flex-1"><a hx-get="/@layout/" hx-swap="outerHTML" hx-target="#layout" hx-trigger="click"
+          hx-push-url="/" class="-m-1.5 p-1.5 text-red hover:text-red1 text-lg">
+          <<>> Inkdocs
+        </a></div>
+      <div class="flex gap-x-12 "><a hx-get="/@layout/documentation" hx-swap="outerHTML" hx-target="#layout"
+          hx-trigger="click" hx-push-url="/documentation"
+          class="-mx-3 rounded-lg px-1 md:px-2 py-2 text-base font-semibold leading-7 transition-all text-center align-middle z-10 text-green1 hover:text-green2 flex flex-row"><span
+            class="mr-1 md:mr-2 material-symbols-outlined">article</span><span
+            class="hidden md:block">Documentation</span></a><a hx-get="/@layout/documentation/plugins"
+          hx-swap="outerHTML" hx-target="#layout" hx-trigger="click" hx-push-url="/documentation/plugins"
+          class="-mx-3 rounded-lg px-1 md:px-2 py-2 text-base font-semibold leading-7 transition-all text-center align-middle z-10 text-green1 hover:text-green2 flex flex-row"><span
+            class="mr-1 md:mr-2 material-symbols-outlined">extension</span><span
+            class="hidden md:block">Plugins</span></a><a hx-get="/@layout/blog" hx-swap="outerHTML" hx-target="#layout"
+          hx-trigger="click" hx-push-url="/blog"
+          class="-mx-3 rounded-lg px-1 md:px-2 py-2 text-base font-semibold leading-7 transition-all text-center align-middle z-10 text-green1 hover:text-green2 flex flex-row"><span
+            class="mr-1 md:mr-2 material-symbols-outlined">description</span><span
+            class="hidden md:block">Blog</span></a></div>
+    </nav>
+  </header>
+  <main id="layout" class="flex flex-row justify-between flex-1">
+    <div class="drawer lg:drawer-open"><input type="checkbox" id="drawer-toggle" class="drawer-toggle" />
+      <div class="drawer-content"><label for="drawer-toggle"
+          class="drawer-button fixed z-20 right-5 hover:cursor-pointer lg:hidden"><span
+            class="material-symbols-outlined">menu</span></label>
+        <article id="content" class="prose prose-invert mx-auto">
+          <title>Inkdocs | Building Your Site</title>
+          <h1>Building Your Site</h1>
+          <hr />
+          <h1>How Inkdocs Builds Your Site</h1>
+          <ol>
+            <li>Everything in the <code>static</code> folder is copied over to the build folder</li>
+            <li>For each file in the <code>content</code> folder, a <code>Parser</code> is run to generate the html and
+              metadata from it</li>
+            <li>Those routes are then passed to all of the <a href="#craftsmen-and-artifacts" title="null">Craftsmen</a>
+              which create Artifacts</li>
+            <li>Those artifacts are then passed to the <a href="#layouts" title="null">Layouts</a> which build the
+              <code>Pages</code>.</li>
+            <li>Those pages are then written to the <code>build</code> folder.</li>
+          </ol>
+          <h1>Options</h1>
+          <h2>The baseHtml</h2>
+          <p>Everything starts in the baseHtml. It should look something like:</p>
+          <pre><code class="language-html">&lt;html&gt;
+              &lt;head&gt;
+              &lt;!-- put stuff for your head here --&gt;
+              &lt;/head&gt;
+              &lt;body&gt;
+              {slot}
+              &lt;/body&gt;
+              &lt;/html&gt;
+            </code></pre>
+          <p>Whenever inkdocs builds a page, it swaps the result of the layout into the <code>{slot}</code> tag.
+            Additionally, some plugins will add custom scripts to the head, so it&#39;s important that your
+            <code>&lt;head&gt;</code> be defined in the baseHtml.</p>
+          <p>Also, the head should not contain a <code>&lt;!DOCTYPE html&gt;</code>. This causes inkdocs builds to fail.
+          </p>
+          <h2>Server options</h2>
+          <p>Server options should look like:</p>
+          <pre><code class="language-ts">const options = {
+              ...
+              server = {
+              port: 3000, // the port to serve on
+              devserverPort: 8008, // the port the devserver listens on
+              },
+              ...
+              }
+            </code></pre>
+          <p>When running the devserver, server options are only reloaded when you restart the devserver</p>
+          <h2>The Layout Tree</h2>
+          <p>Each file chooses a layout using the steps shown <a
+              hx-get="/@content/documentation/writing-content#choosing-your-layout" hx-swap="outerHTML"
+              hx-target=#content hx-push-url=/documentation/writing-content#choosing-your-layout hx-trigger="click"
+              title="null">here</a></p>
+          <p>The route tree is a part of how inkdocs looks at layouts. For example, the route tree for this site looks
+            like:</p>
+          <pre><code class="language-ts">layoutTree: {
+              path: &quot;&quot;, // the root path
+              layoutName: &quot;&quot;,
+              children: [
+              {
+              path: &quot;documentation&quot;, //everything in the /documentation route will use the layout named
+              &quot;docs&quot;
+              layoutName: &quot;docs&quot;,
+              children: [],
+              },
+              {
+              path: &quot;blog&quot;,
+              layoutName: &quot;blogpost&quot;,
+              children: [],
+              },
+              ],
+              },
+            </code></pre>
+          <h1>Routers</h1>
+          <p>Routers are special plugins that will handle all of the parsing for you. There are two you can choose from
+            by default:</p>
+          <ul>
+            <li><a hx-get="/@content/documentation/plugins/swap-router" hx-swap="outerHTML" hx-target=#content
+                hx-push-url=/documentation/plugins/swap-router hx-trigger="click" title="null">Swap Router</a>
+              (recommended)</li>
+            <li><a hx-get="/@content/documentation/plugins/standard-router" hx-swap="outerHTML" hx-target=#content
+                hx-push-url=/documentation/plugins/standard-router hx-trigger="click" title="null">Standard Router</a>
+            </li>
+          </ul>
+          <p>Most of the advantages of inkdocs are brought by the swap router, so it is recommended that you use it. If
+            you know what you&#39;re doing however, you can just use the standard router or no router if you want to
+            build the parser yourself.</p>
+          <h1>Layouts</h1>
+          <p>Layouts are the core building blocks of inkdocs. If you&#39;ve used any component based web framework
+            before (React, Vue, Solid, Svelte), they should look pretty familiar:</p>
+          <pre><code class="language-tsx">const MyLayout: Layout = (
+              children: JSX.Element, // the &quot;content&quot; of the page built by the parser
+              metadata: any, // metadata provided by the parser
+              artifacts: Map&lt;string, any&gt;, // artifacts provided by craftsmen
+              filepath: string, // the filepath that the page will be written to
+              ) {
+              // returns JSX
+              return (
+              &lt;p&gt;Hello world&lt;/p&gt;
+              )
+              }
+
+              export MyLayout
+            </code></pre>
+          <p>Layouts need to be defined in the options with a name that can be referenced by the metadata of content or
+            the layout tree. This is done using a map:</p>
+          <pre><code class="language-ts">layouts: new Map([
+              [&quot;default&quot;, DefaultLayout],
+              [&quot;docs&quot;, DocsLayout],
+              [&quot;landing&quot;, LandingLayout],
+              [&quot;blogpost&quot;, BlogLayout],
+              ]),
+            </code></pre>
+          <p>You can define all of your layouts in separate files or put everything in the <code>inkdocs.ts</code> file.
+            Inkdocs does not care.</p>
+          <h1>Craftsmen and Artifacts</h1>
+          <p>While layouts can build single pages, sometimes you need large components in your layout that need to look
+            at every single route. That&#39;s where Craftsmen come in. This site uses a craftsman for the sidebar that
+            looks like:</p>
+          <pre><code class="language-tsx">export default function Sidebar(_: InkdocsOptions, routes: Route[]): Artifact
+              {
+              const routeTree = makeRouteTree(routes); // other function defined later in the file that I&#39;m not
+              including
+
+              // find the tree that is the segment &quot;documentation&quot;
+              let documentationTree: RouteTree[] = [];
+              for (let i = 0; i &lt; routeTree.length; i++) {
+              if (routeTree[i].segment === &quot;documentation&quot;) {
+              documentationTree = routeTree[i].children;
+              }
+              }
+              sortTree(documentationTree);
+
+              const sidebar = (
+              &lt;div class=&quot;flex flex-col bg-background&quot;&gt;
+              &lt;h1 class=&quot;m-2 text-2xl&quot;&gt;
+              &lt;label
+              for=&quot;drawer-toggle&quot;
+              class=&quot;lg:hidden drawer-button inline btn btn-primary&quot;
+              &gt;
+              Close Drawer
+              &lt;/label&gt;
+              Documentation
+              &lt;/h1&gt;
+              {documentationTree.map((tree) =&gt; (
+              &lt;SidebarItem depth={0} tree={tree} /&gt;
+              ))}
+              &lt;/div&gt;
+              );
+
+              return {
+              name: &quot;sidebar&quot;,
+              data: sidebar,
+              };
+              }
+            </code></pre>
+          <p>It is then defined in the options with:</p>
+          <pre><code class="language-ts">craftsmen: [Sidebar],
+            </code></pre>
+          <p>That artifact is precomputed before all of tha layouts and can then be used by then:</p>
+          <pre><code class="language-tsx">const DocsLayout: Layout = (
+              children: JSX.Element,
+              metadata: any,
+              artifacts,
+              ) =&gt; {
+              const sidebar = artifacts.get(&quot;sidebar&quot;) as JSX.Element; // here
+              return (
+              &lt;Root&gt;
+              &lt;div class=&quot;drawer lg:drawer-open&quot;&gt;
+              &lt;input type=&quot;checkbox&quot; id=&quot;drawer-toggle&quot; class=&quot; drawer-toggle&quot; /&gt;
+
+              &lt;div class=&quot;drawer-content&quot;&gt;
+              &lt;label
+              for=&quot;drawer-toggle&quot;
+              class=&quot;drawer-button inline lg:hidden btn btn-primary&quot;
+              &gt;
+              Open Drawer
+              &lt;/label&gt;
+
+              &lt;article id=&quot;content&quot; class=&quot;prose prose-invert mx-auto&quot;&gt;
+              &lt;title&gt;Inkdocs | {metadata.title ?? &quot;Untitled&quot;}&lt;/title&gt;
+              {children}
+              &lt;/article&gt;
+              &lt;/div&gt;
+
+              &lt;div class=&quot;drawer-side h-full&quot;&gt;{sidebar}&lt;/div&gt;
+              &lt;/div&gt;
+              &lt;/Root&gt;
+              );
+              };
+            </code></pre>
+          <p>The main disadvantage of artifacts is that they are not typed properly. This is because I am stupid. One
+            day I will figure out how to make then typed properly.</p>
+        </article>
+      </div>
+      <div class="drawer-side">
+        <div
+          class="flex flex-col fixed h-[calc(100vh-16rem)] left-2 top-24 lg:h-auto z-20 bg-background border rounded-md lg:border-none">
+          <h1 class="m-2 text-2xl">Documentation</h1>
+          <details open>
+            <summary class="m-2 text-lg"><a hx-get="/@content/documentation/overview" hx-swap="outerHTML"
+                hx-target="#content" hx-trigger="click" hx-push-url="/documentation/overview"
+                class="text-primary hover:text-primary-hover transition-all">Overview</a></summary>
+            <div class="ml-4">
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/overview/getting-started" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/overview/getting-started"
+                  class="text-primary hover:text-primary-hover transition-all">Getting Started</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/overview/writing-content" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/overview/writing-content"
+                  class="text-primary hover:text-primary-hover transition-all">Writing Content</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/overview/constructing-your-site"
+                  hx-swap="outerHTML" hx-target="#content" hx-trigger="click"
+                  hx-push-url="/documentation/overview/constructing-your-site"
+                  class="text-primary hover:text-primary-hover transition-all">Building Your Site</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/overview/deployment" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/overview/deployment"
+                  class="text-primary hover:text-primary-hover transition-all">Deployment</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/overview/advanced" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/overview/advanced"
+                  class="text-primary hover:text-primary-hover transition-all">Advanced Usage</a></div>
+            </div>
+          </details>
+          <details open>
+            <summary class="m-2 text-lg"><a hx-get="/@content/documentation/plugins" hx-swap="outerHTML"
+                hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins"
+                class="text-primary hover:text-primary-hover transition-all">Plugins</a></summary>
+            <div class="ml-4">
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/plugins/header-ids" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins/header-ids"
+                  class="text-primary hover:text-primary-hover transition-all">Header Ids</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/plugins/swap-router" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins/swap-router"
+                  class="text-primary hover:text-primary-hover transition-all">Swap Router</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/plugins/tailwind" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins/tailwind"
+                  class="text-primary hover:text-primary-hover transition-all">TailwindCSS</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/plugins/sidebar" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins/sidebar"
+                  class="text-primary hover:text-primary-hover transition-all">Sidebar</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/plugins/standard-router" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/plugins/standard-router"
+                  class="text-primary hover:text-primary-hover transition-all">Standard Router</a></div>
+            </div>
+          </details>
+          <details open>
+            <summary class="m-2 text-lg"><a hx-get="/@content/documentation/components" hx-swap="outerHTML"
+                hx-target="#content" hx-trigger="click" hx-push-url="/documentation/components"
+                class="text-primary hover:text-primary-hover transition-all">Components</a></summary>
+            <div class="ml-4">
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/components/inline-script" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/components/inline-script"
+                  class="text-primary hover:text-primary-hover transition-all">Inline Script</a></div>
+              <div class="m-2 text-lg"><a hx-get="/@content/documentation/components/swap-link" hx-swap="outerHTML"
+                  hx-target="#content" hx-trigger="click" hx-push-url="/documentation/components/swap-link"
+                  class="text-primary hover:text-primary-hover transition-all">Swap Link</a></div>
+            </div>
+          </details>
+          <div class="m-2 text-lg"><a hx-get="/@content/documentation/recipes" hx-swap="outerHTML" hx-target="#content"
+              hx-trigger="click" hx-push-url="/documentation/recipes"
+              class="text-primary hover:text-primary-hover transition-all">Recipes</a></div>
+          <div class="m-2 text-lg"><a hx-get="/@content/documentation/contributing" hx-swap="outerHTML"
+              hx-target="#content" hx-trigger="click" hx-push-url="/documentation/contributing"
+              class="text-primary hover:text-primary-hover transition-all">Contributing</a></div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <footer class="sticky z-0">
+    <div class="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
+      <div class="flex justify-center space-x-6 md:order-2"><a href="https://github.com/firesquid6/inkdocs"
+          class="text-gray-400 hover:text-gray-500"><span class="sr-only">GitHub</span><svg class="h-6 w-6"
+            fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill-rule="evenodd"
+              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+              clip-rule="evenodd"></path>
+          </svg></a></div>
+      <div class="mt-8 md:order-1 md:mt-0">
+        <p class="text-center text-xs leading-5 text-gray-500">Made with ❤ by the inkdocs contributors</p>
+      </div>
+    </div>
+  </footer>
+</body>
+
+</html>
